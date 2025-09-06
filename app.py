@@ -14,8 +14,10 @@ def log_request_info():
     print("➡️ Headers:", dict(request.headers))
     
 CORS(app, resources={r"/*": {"origins": [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://eco-finds-sigma.vercel.app"
 ]}}, supports_credentials=True)
+
 app.config["MONGO_URI"] = "mongodb+srv://sonukumarm_db_user:Asdf%401234@cluster0.atgi1eg.mongodb.net/eco-finds"
 app.config["JWT_SECRET_KEY"] = "300253d378818f5de098b6a67f53a0f7a015872f8f25bf80ce9189eaa80f6b4e"
 
@@ -649,6 +651,25 @@ def checkout():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 🟢 Get all categories
+@app.route("/categories", methods=["GET"])
+def get_categories():
+    categories = list(mongo.db.categories.find())
+    return jsonify([to_json(c) for c in categories])
+
+# 🟢 Get all listings
+@app.route("/listings", methods=["GET"])
+def get_listings():
+    listings = list(mongo.db.listings.find())
+    return jsonify([to_json(l) for l in listings])
+
+# 🟢 Get listings by categoryId
+@app.route("/listings/<category_id>", methods=["GET"])
+def get_listings_by_category(category_id):
+    listings = list(mongo.db.listings.find({"categoryId": ObjectId(category_id)}))
+    return jsonify([to_json(l) for l in listings])
+
 
 @app.route("/auth/orders", methods=["GET"])
 @jwt_required()
